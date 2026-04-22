@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shehan Nelundeniya — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00ff88;
+      --green-dim: #00cc6a;
+      --green-dark: #003d1f;
+      --green-muted: #1a4d33;
+      --cyan: #00e5ff;
+      --cyan-dim: #00b8cc;
+      --blue: #4d9fff;
+      --yellow: #ffd700;
+      --red: #ff4d6d;
+      --bg: #050f08;
+      --bg2: #0a1a10;
+      --bg3: #0d2218;
+      --text: #c8f7dc;
+      --text-dim: #6db88a;
+      --border: #1a4d33;
+      --border-bright: #00ff8840;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    ::selection { background: var(--green); color: var(--bg); }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Fira Code', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* Vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Grid background */
+    .bg-grid {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .ascii-art {
+      font-size: clamp(0.35rem, 1.2vw, 0.65rem);
+      line-height: 1.2;
+      color: var(--green);
+      text-shadow: 0 0 12px var(--green), 0 0 30px rgba(0,255,136,0.3);
+      white-space: pre;
+      overflow: hidden;
+      animation: fadeSlideDown 0.8s ease-out forwards;
+    }
+
+    .header-meta {
+      margin-top: 1.5rem;
+      animation: fadeSlideDown 0.8s 0.2s ease-out both;
+    }
+
+    .title-line {
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .title-line .bracket { color: var(--green); }
+
+    .location-line {
+      color: var(--cyan);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .location-line::before {
+      content: '📍';
+      font-size: 0.75rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg3);
+      border: 1px solid var(--green-dark);
+      padding: 0.3rem 0.8rem;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--green-dim);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    /* ── TERMINAL PROMPT ────────────────────── */
+    .prompt {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 0.8rem;
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .prompt-user { color: var(--cyan); }
+    .prompt-at { color: var(--text-dim); }
+    .prompt-host { color: var(--cyan-dim); }
+    .prompt-colon { color: var(--text-dim); }
+    .prompt-dir { color: var(--blue); }
+    .prompt-dollar { color: var(--text-dim); margin-right: 0.5rem; }
+    .prompt-cmd { color: var(--text); }
+
+    /* ── SECTIONS ───────────────────────────── */
+    section {
+      margin-bottom: 2.8rem;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeSlideUp 0.6s ease-out forwards;
+    }
+
+    section:nth-child(1) { animation-delay: 0.3s; }
+    section:nth-child(2) { animation-delay: 0.5s; }
+    section:nth-child(3) { animation-delay: 0.7s; }
+    section:nth-child(4) { animation-delay: 0.9s; }
+    section:nth-child(5) { animation-delay: 1.1s; }
+    section:nth-child(6) { animation-delay: 1.3s; }
+
+    .section-body {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green-dark);
+      padding: 1.2rem 1.4rem;
+      position: relative;
+    }
+
+    .section-body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--green-dark), transparent);
+    }
+
+    /* ── ABOUT ──────────────────────────────── */
+    .about-text {
+      color: var(--text);
+      line-height: 1.9;
+      font-size: 0.88rem;
+    }
+
+    /* ── SKILLS ─────────────────────────────── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .skill-group-label {
+      color: var(--cyan);
+      font-size: 0.72rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--green-dim);
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .tag:hover {
+      background: var(--green);
+      color: var(--bg);
+      border-color: var(--green);
+      box-shadow: 0 0 10px rgba(0,255,136,0.4);
+    }
+
+    /* ── EXPERIENCE ─────────────────────────── */
+    .job {
+      margin-bottom: 1.4rem;
+      padding-bottom: 1.4rem;
+      border-bottom: 1px dashed var(--border);
+    }
+    .job:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .job-title {
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .job-period {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+
+    .job-company {
+      color: var(--cyan);
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .job-desc {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      line-height: 1.7;
+    }
+
+    .job-desc li {
+      list-style: none;
+      padding-left: 1.2rem;
+      position: relative;
+      margin-bottom: 0.2rem;
+    }
+
+    .job-desc li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--green-dark);
+    }
+
+    /* ── EDUCATION ──────────────────────────── */
+    .edu-item {
+      margin-bottom: 1.2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px dashed var(--border);
+    }
+    .edu-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .edu-degree {
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .edu-school {
+      color: var(--cyan);
+      font-size: 0.8rem;
+      margin: 0.2rem 0;
+    }
+
+    .edu-period {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+
+    /* ── CERTIFICATIONS ─────────────────────── */
+    .cert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .cert-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      font-size: 0.82rem;
+    }
+
+    .cert-icon {
+      color: var(--yellow);
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .cert-name { color: var(--text); }
+    .cert-issuer { color: var(--text-dim); font-size: 0.75rem; }
+
+    /* ── CONTACT ────────────────────────────── */
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.5rem 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-link::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: var(--green);
+      transition: left 0.25s ease;
+      z-index: 0;
+    }
+
+    .contact-link:hover::before { left: 0; }
+    .contact-link:hover { color: var(--bg); border-color: var(--green); }
+    .contact-link span { position: relative; z-index: 1; }
+
+    /* ── FOOTER PROMPT ──────────────────────── */
+    .footer-prompt {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.1em;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 1s step-end infinite;
+      margin-left: 4px;
+    }
+
+    /* ── ANIMATIONS ─────────────────────────── */
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    @keyframes glitch {
+      0%, 100% { clip-path: inset(0 0 100% 0); }
+      20% { clip-path: inset(30% 0 40% 0); transform: translateX(-4px); }
+      40% { clip-path: inset(60% 0 10% 0); transform: translateX(4px); }
+      60% { clip-path: inset(10% 0 70% 0); transform: translateX(-2px); }
+      80% { clip-path: inset(80% 0 5% 0); transform: translateX(2px); }
+    }
+
+    /* ── MISC ───────────────────────────────── */
+    .output-line {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+    }
+
+    .highlight { color: var(--green); }
+    .muted { color: var(--text-dim); }
+
+    .divider {
+      color: var(--green-dark);
+      font-size: 0.75rem;
+      margin: 0.6rem 0;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 600px) {
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .contact-links { flex-direction: column; }
+      .job-header { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="container">
+
+    <!-- ── HEADER ─────────────────────────────── -->
+    <header>
+      <pre class="ascii-art">
+ ____  _   _  _____  _   _    _    _   _ 
+/ ___|| | | || ____|| | | |  / \  | \ | |
+\___ \| |_| ||  _|  | |_| | / _ \ |  \| |
+ ___) |  _  || |___ |  _  |/ ___ \| |\  |
+|____/|_| |_||_____||_| |_/_/   \_|_| \_|
+</pre>
+      <div class="header-meta">
+        <p class="title-line"><span class="bracket">[</span> IT Enthusiastツ &nbsp;|&nbsp; BSc (Hons) Computer Networking (UK) <span class="bracket">]</span></p>
+        <p class="location-line">Colombo, Sri Lanka</p>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span>Available for opportunities</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── ABOUT ──────────────────────────────── -->
+    <section>
+      <div class="prompt">
+        <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+        <span class="prompt-cmd">cat about.md</span>
+      </div>
+      <div class="section-body">
+        <p class="about-text">
+          An optimistic individual who is passionate, highly motivated, and possesses a growth mindset —
+          who believes in taking up challenges and delivering output with the utmost professionalism,
+          confidence, and enthusiasm.<br><br>
+          Skilled in <span class="highlight">Client Support</span>, <span class="highlight">System Support</span>,
+          and <span class="highlight">IT infrastructure</span>. Driven by curiosity and a commitment to
+          continuous learning in the ever-evolving tech landscape.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── SKILLS ─────────────────────────────── -->
+    <!--<section>
+      <div class="prompt">
+        <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+        <span class="prompt-cmd">cat skills.json</span>
+      </div>
+      <div class="section-body">
+        <div class="skills-grid">
+          <div>
+            <div class="skill-group-label">// Networking</div>
+            <div class="skill-tags">
+              <span class="tag">TCP/IP</span>
+              <span class="tag">DNS</span>
+              <span class="tag">DHCP</span>
+              <span class="tag">VLANs</span>
+              <span class="tag">VPN</span>
+              <span class="tag">Firewalls</span>
+            </div>
+          </div>
+          <div>
+            <div class="skill-group-label">// Systems</div>
+            <div class="skill-tags">
+              <span class="tag">Windows Server</span>
+              <span class="tag">Linux</span>
+              <span class="tag">Active Directory</span>
+              <span class="tag">VMware</span>
+            </div>
+          </div>
+          <div>
+            <div class="skill-group-label">// Support</div>
+            <div class="skill-tags">
+              <span class="tag">IT Support</span>
+              <span class="tag">Help Desk</span>
+              <span class="tag">Troubleshooting</span>
+              <span class="tag">ITIL</span>
+            </div>
+          </div>
+          <div>
+            <div class="skill-group-label">// Other</div>
+            <div class="skill-tags">
+              <span class="tag">Cloud</span>
+              <span class="tag">Cyber Security</span>
+              <span class="tag">HTML/CSS</span>
+              <span class="tag">Git</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── EXPERIENCE ─────────────────────────── 
+    <section>
+      <div class="prompt">
+        <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+        <span class="prompt-cmd">cat experience.log</span>
+      </div>
+      <div class="section-body">
+        <div class="job">
+          <div class="job-header">
+            <span class="job-title">IT Support Engineer</span>
+            <span class="job-period">2022 — Present</span>
+          </div>
+          <div class="job-company">▸ [Current Company] · Colombo, LK</div>
+          <ul class="job-desc">
+            <li>Provided Level 1 &amp; 2 technical support to end users across the organisation</li>
+            <li>Managed network infrastructure, user accounts, and system configurations</li>
+            <li>Collaborated with cross-functional teams to resolve complex IT incidents</li>
+          </ul>
+        </div>
+        <div class="job">
+          <div class="job-header">
+            <span class="job-title">IT Intern</span>
+            <span class="job-period">2021 — 2022</span>
+          </div>
+          <div class="job-company">▸ Internship · Sri Lanka</div>
+          <ul class="job-desc">
+            <li>Assisted in day-to-day IT operations and helpdesk support</li>
+            <li>Gained hands-on experience in network administration and system maintenance</li>
+          </ul>
+        </div>
+      </div>
+      <p class="output-line" style="margin-top:0.5rem; font-size:0.72rem; color: var(--text-dim);"># Update this section with your actual experience from LinkedIn</p>
+    </section>
+
+    <!-- ── EDUCATION ──────────────────────────── 
+    <section>
+      <div class="prompt">
+        <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+        <span class="prompt-cmd">cat education.md</span>
+      </div>
+      <div class="section-body">
+        <div class="edu-item">
+          <div class="edu-degree">BSc (Hons) Computer Networking</div>
+          <div class="edu-school">▸ University — United Kingdom (Distance)</div>
+          <div class="edu-period">Graduated / In Progress</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CERTIFICATIONS ─────────────────────── 
+    <section>
+      <div class="prompt">
+        <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+        <span class="prompt-cmd">ls -la ./certifications/</span>
+      </div>
+      <div class="section-body">
+        <div class="cert-list">
+          <div class="cert-item">
+            <span class="cert-icon">★</span>
+            <div>
+              <div class="cert-name">CompTIA Network+ (or relevant cert)</div>
+              <div class="cert-issuer">Issuer · Year</div>
+            </div>
+          </div>
+          <div class="cert-item">
+            <span class="cert-icon">★</span>
+            <div>
+              <div class="cert-name">Microsoft / Cisco / ITIL Certification</div>
+              <div class="cert-issuer">Issuer · Year</div>
+            </div>
+          </div>
+        </div>
+        <p class="output-line" style="margin-top:0.8rem; font-size:0.72rem;"># Replace placeholders with your real certifications</p>
+      </div>
+    </section> 
+
+    <!-- ── CONTACT ────────────────────────────── -->
+    <section>
+      <div class="prompt">
+        <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+        <span class="prompt-cmd">echo $CONTACT_INFO</span>
+      </div>
+      <div class="section-body">
+        <div class="contact-links">
+          <a class="contact-link" href="https://www.linkedin.com/in/shehantrinity/" target="_blank" rel="noopener noreferrer">
+            <span>⬡</span><span>LinkedIn</span>
+          </a>
+          <a class="contact-link" href="https://www.instagram.com/shehaan_" target="_blank" rel="noopener noreferrer">
+            <span>◈</span><span>Instagram</span>
+          </a>
+          <a class="contact-link" href="mailto:hello@shehan.xyz">
+            <span>✉</span><span>hello@shehan.xyz</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ─────────────────────────────── -->
+    <div class="footer-prompt">
+      <span class="prompt-user">shehan</span><span class="prompt-at">@</span><span class="prompt-host">shehan.xyz</span><span class="prompt-colon">:</span><span class="prompt-dir">~</span><span class="prompt-dollar"> $</span>
+      <span class="cursor"></span>
+    </div>
+
+  </div>
+</body>
+</html>
